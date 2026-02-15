@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Guess the Rasa</title>
+
+<style>
+body{
+  margin:0;
+  font-family: "Segoe UI", sans-serif;
+  background:#f4f4f4;
+  text-align:center;
+}
+
+/* Title */
+h1{
+  margin-top:30px;
+}
+
+/* Play Button */
+#playBtn{
+  padding:14px 28px;
+  font-size:18px;
+  border:none;
+  background:#222;
+  color:white;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+#playBtn:hover{
+  background:#444;
+}
+
+/* Game container */
+#game{
+  max-width:900px;
+  margin:30px auto;
+  display:none;
+}
+
+/* Song title */
+#songTitle{
+  font-size:24px;
+  margin:20px 0;
+  font-weight:bold;
+}
+
+/* Video player styling */
+video{
+  max-width:100%;
+  border-radius:12px;
+  box-shadow:0 6px 18px rgba(0,0,0,.2);
+}
+
+/* Stanza */
+#stanza{
+  font-style:italic;
+  margin:20px;
+}
+
+/* Rasa grid */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+  margin:30px auto;
+  max-width:600px;
+}
+
+.rasa-btn{
+  padding:20px;
+  border:none;
+  border-radius:12px;
+  font-weight:bold;
+  cursor:pointer;
+  color:white;
+  font-size:16px;
+  transition:transform .2s;
+}
+
+.rasa-btn:hover{
+  transform:scale(1.05);
+}
+
+/* Result box */
+#result{
+  display:none;
+  margin-top:30px;
+  padding:25px;
+  background:white;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.1);
+}
+
+/* Correct rasa text */
+#correctRasa{
+  font-size:28px;
+  margin-bottom:10px;
+}
+
+/* Description */
+#rasaDesc{
+  font-size:18px;
+  color:#555;
+}
+
+/* Play again */
+#againBtn{
+  margin-top:20px;
+  padding:10px 20px;
+  border:none;
+  background:#222;
+  color:white;
+  border-radius:8px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎵 Guess the Rasa 🎭</h1>
+
+<button id="playBtn">Play</button>
+
+<div id="game">
+
+  <div id="songTitle"></div>
+
+  <div id="player"></div>
+
+  <div id="stanza"></div>
+
+  <div class="grid" id="rasaGrid"></div>
+
+  <div id="result">
+    <h2 id="correctRasa"></h2>
+    <p id="rasaDesc"></p>
+    <button id="againBtn">Play Again</button>
+  </div>
+
+</div>
+
+<script>
+
+/* ===============================
+   SONG DATA (LOCAL VIDEOS)
+================================ */
+
+const songs = [
+
+{
+title:"Aye Hairat-e-Aashiqui",
+video:"videos/1.mp4",
+stanza:"Oh awe-inspiring love, do not wake us up. Let not my feet touch the ground.",
+rasa:"sringara"
+},
+
+{
+title:"Mora Saiyaan",
+video:"videos/2.mp4",
+stanza:"My beloved is not speaking to me. I have tried a thousand times in vain.",
+rasa:"karuna"
+},
+
+{
+title:"Haal Kaisa Hai Janaab Ka",
+video:"videos/3.mp4",
+stanza:"How has the gentleman been? What do you think?",
+rasa:"haasya"
+},
+
+{
+title:"Kadam Kadam",
+video:"videos/4.mp4",
+stanza:"Step by step we march ahead, singing songs of joy.",
+rasa:"veera"
+},
+
+{
+title:"Zindagi Kaisi Hai Paheli",
+video:"videos/5.mp4",
+stanza:"Life is a mysterious puzzle, it can make you laugh one day and cry the other.",
+rasa:"adbhuta"
+}
+
+];
+
+/* ===============================
+   RASA DATA (TEXT ONLY)
+================================ */
+
+const rasas = {
+
+sringara:{color:"#e91e63",
+desc:"The rasa of love, beauty, attraction and romance."},
+
+karuna:{color:"#607d8b",
+desc:"The rasa of compassion, sorrow and empathy."},
+
+haasya:{color:"#ff9800",
+desc:"The rasa of humour, joy and laughter."},
+
+raudra:{color:"#d32f2f",
+desc:"The rasa of anger, fury and destructive energy."},
+
+veera:{color:"#3f51b5",
+desc:"The rasa of courage, heroism and determination."},
+
+bibhatsya:{color:"#795548",
+desc:"The rasa of disgust, revulsion and aversion."},
+
+adbhuta:{color:"#9c27b0",
+desc:"The rasa of wonder, amazement and curiosity."},
+
+bhayanaka:{color:"#424242",
+desc:"The rasa of fear, terror and anxiety."},
+
+shanta:{color:"#4caf50",
+desc:"The rasa of peace, tranquility and spiritual calm."}
+
+};
+
+/* ===============================
+   GAME LOGIC
+================================ */
+
+let currentSong;
+
+const playBtn = document.getElementById("playBtn");
+const game = document.getElementById("game");
+const title = document.getElementById("songTitle");
+const player = document.getElementById("player");
+const stanza = document.getElementById("stanza");
+const grid = document.getElementById("rasaGrid");
+const result = document.getElementById("result");
+
+playBtn.onclick = startGame;
+document.getElementById("againBtn").onclick = startGame;
+
+function startGame(){
+
+  result.style.display="none";
+  game.style.display="block";
+
+  currentSong = songs[Math.floor(Math.random()*songs.length)];
+
+  title.textContent = currentSong.title;
+
+  /* 🎬 LOCAL VIDEO PLAYER */
+  player.innerHTML = `
+  <video width="700" controls autoplay>
+    <source src="${currentSong.video}" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>`;
+
+  stanza.textContent = `"${currentSong.stanza}"`;
+
+  buildGrid();
+}
+
+function buildGrid(){
+
+  grid.innerHTML="";
+
+  for(const rasa in rasas){
+
+    const btn = document.createElement("button");
+    btn.className="rasa-btn";
+    btn.style.background = rasas[rasa].color;
+    btn.textContent = rasa.toUpperCase();
+
+    btn.onclick = ()=>checkAnswer(rasa);
+
+    grid.appendChild(btn);
+  }
+}
+
+function checkAnswer(selected){
+
+  const correct = currentSong.rasa;
+  const data = rasas[correct];
+
+  result.style.display="block";
+
+  document.getElementById("correctRasa").textContent =
+  "Correct Rasa: " + correct.toUpperCase();
+
+  document.getElementById("rasaDesc").textContent = data.desc;
+}
+
+</script>
+
+</body>
+</html>
